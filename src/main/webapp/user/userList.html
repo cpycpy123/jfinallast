@@ -1,0 +1,109 @@
+#@layout()
+#define main()
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<a  class="layui-btn layui-btn-normal" href="#(ctx)/user/addUser">创建用户</a>
+<!--<a href="javascript:void(0)" class="layui-btn layui-btn-normal" onclick="topWindow('#(ctx)/user/addUser')" >创建用户（窗口模式）</a>-->
+<table class="layui-hide" id="test" lay-filter="demo" ></table>
+
+
+<script type="text/javascript">
+    layui.config({
+        version: '1525771196163' //为了更新 js 缓存，可忽略
+    });
+
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element'], function(){
+        var laydate = layui.laydate //日期
+            ,laypage = layui.laypage //分页
+        layer = layui.layer //弹层
+            ,table = layui.table //表格
+            ,carousel = layui.carousel //轮播
+            ,upload = layui.upload //上传
+            ,element = layui.element; //元素操作
+
+
+        layer.msg('cpy的最后JFinal+layui！！！');
+
+        //监听Tab切换
+        element.on('tab(demo)', function(data){
+            layer.msg('切换了：'+ this.innerHTML);
+            console.log(data);
+        });
+
+        //执行一个 table 实例
+        table.render({
+            elem: '#test'
+            ,height: 500
+            ,url: '#(ctx)/user/page' //数据接口
+            ,page: true //开启分页
+            ,cols: [[ //表头
+                {field: 'id', title: 'ID', width:100, sort: true, fixed: 'left'}
+                ,{field: 'name', title: '用户名', width:200}
+                ,{field: 'password', title: '密码', width:200}
+                ,{field: 'age', title: '年龄', width:200, sort: true}
+                ,{field: 'sex', title: '性别', width:200}
+                ,{field: 'brithday', title: '出生年月', width:200}
+                ,{field: 'address', title: '地址', width:200}
+                ,{field: 'createTime', title: '创建时间', width:200}
+                ,{field: 'updateTime', title: '修改时间', width:200}
+                ,{fixed: 'right',  title: '操作',width: 200, align:'center', toolbar: '#barDemo'}
+            ]]
+        });
+
+        //监听工具条
+        table.on('tool(demo)', function(obj){ //tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                ,layEvent = obj.event; //获得 lay-event 对应的值
+//对应主页的查看：lay-event
+            if(layEvent === 'detail'){
+                layer.msg('查看操作');
+                topWindow("#(ctx)/user/editUser?id="+data.id+"&look=true");
+            } else if(layEvent === 'del'){//对应主页的删除
+                layer.confirm('确定要删除该条数据么？', function(index){
+                    obj.del(); //删除对应行（tr）的DOM结构
+                    layer.close(index);
+                    //向服务端发送删除指令
+                    console.log(data);
+                    $.get("#(ctx)/user/deleteUser/"+data.id);
+                });
+            } else if(layEvent === 'edit'){
+                layer.msg('编辑操作');
+                topWindow("#(ctx)/user/editUser?id="+data.id+"&look=false");
+                // window.location.href="#(ctx)/user/editUser/"+data.id; //当前跳转新页面
+                //window.open("#(ctx)/user/editUser/"+data.id,'newwindow','height=800,width=1200,top=100,left=100,toolbar=no,menubar=no,scrollbars=no, resizable=no,location=no, status=no')  //打开新窗口处理
+            }
+
+        });
+
+    });
+        //查看或者点击弹出界面
+    // function topWindow(url){
+    //     var that = this;
+    //     //多窗口模式，层叠置顶
+    //     layer.open({
+    //         type: 2 //此处以iframe举例
+    //         ,title: '查看'
+    //         ,area: ['500px', '500px;']
+    //         ,shade: 0
+    //         ,maxmin: true
+    //         ,offset: [300,600]
+    //         ,content:url
+    //         ,btn: [/* '继续弹出', */ '关闭'] //
+    //         /*      ,yes: function(){
+    //                $(that).click();
+    //              } */
+    //         ,btn2: function(){
+    //             layer.closeAll();
+    //         }
+    //         ,zIndex: layer.zIndex //重点1
+    //         ,success: function(layero){
+    //             // layer.setTop(layero); //
+    //         }
+    //     });
+    // }
+
+</script>
+#end
